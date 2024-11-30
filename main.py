@@ -26,10 +26,14 @@ def parse_event(group_name, day) -> Event:
     try:
         # Разбор времени начала и конца занятия
         time_text = day.find(class_=COLUMN_TIME).text.strip()
-        time_begin_str, time_end_str = time_text.split('-')
+        try:
+            time_begin_str, time_end_str = time_text.split('-')
+        except Exception:
+            time_begin_str = time_text
+            time_end_str = None
         time_format = "%H.%M"
         time_begin = datetime.datetime.strptime(time_begin_str, time_format)
-        time_end = datetime.datetime.strptime(time_end_str, time_format)
+        time_end = datetime.datetime.strptime(time_end_str, time_format) if time_end_str else None
 
         # Разбор даты
         day_num = int(day.find(class_=COLUMN_DAY).text.strip())
@@ -51,7 +55,7 @@ def parse_event(group_name, day) -> Event:
             hour=time_end.hour,
             minute=time_end.minute,
             tzinfo=moscow_tz
-        )
+        ) if time_end else None
 
         # Формирование названия и описания события
         subject = day.find(class_=COLUMN_SUBJECT).text.strip()
